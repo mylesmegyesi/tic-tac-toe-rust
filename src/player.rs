@@ -4,8 +4,8 @@ use std::fmt::Debug;
 
 pub trait Player: Debug {
     fn get_marker(&self) -> &str;
-    fn get_move<'board>(&self, other_player: Rc<dyn Player>, board: &'board Board) -> &'board CellReference;
-    fn to_boxed(self) -> Box<dyn Player>;
+    fn get_move<'board>(&self, other_player: Rc<Player>, board: &'board Board) -> &'board CellReference;
+    fn to_boxed(self) -> Box<Player>;
 }
 
 impl PartialEq for Player {

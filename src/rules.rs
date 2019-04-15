@@ -3,11 +3,23 @@ use crate::board::{Board, Cell};
 use crate::player::Player;
 
 #[derive(Debug)]
-#[derive(PartialEq)]
 pub enum GameState {
     Pending,
     Draw,
-    Win(Rc<dyn Player>),
+    Win(Rc<Player>),
+}
+
+impl PartialEq for GameState {
+
+    // OMG there has to be an easier way
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (GameState::Pending, GameState::Pending) => true,
+            (GameState::Draw, GameState::Draw) => true,
+            (GameState::Win(player), GameState::Win(other_player)) => player == other_player,
+            _ => false
+        }
+    }
 }
 
 pub fn analyze_game_state(board: &Board) -> GameState {
@@ -25,7 +37,7 @@ pub fn analyze_game_state(board: &Board) -> GameState {
     GameState::Pending
 }
 
-fn get_segment_winner(segment: &Vec<&Cell>) -> Option<Rc<dyn Player>> {
+fn get_segment_winner(segment: &Vec<&Cell>) -> Option<Rc<Player>> {
     segment.first().and_then(|cell| {
         cell.get_occupant().and_then(|first_cell_occupant| {
             let all_in_segment_match = segment[1..].iter().all(|c| {

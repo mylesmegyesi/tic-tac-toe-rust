@@ -24,7 +24,7 @@ impl Player for MockPlayer {
         &self.marker
     }
 
-    fn get_move<'board>(&self, _: Rc<dyn Player>, board: &'board Board) -> &'board CellReference {
+    fn get_move<'board>(&self, _: Rc<Player>, board: &'board Board) -> &'board CellReference {
         let mut cells = board.cells().enumerate();
         let move_index = self.moves.borrow_mut().pop().expect("mock player has run out of moves");
         let (_, cell) = cells
@@ -34,7 +34,7 @@ impl Player for MockPlayer {
         cell.get_reference()
     }
 
-    fn to_boxed(self) -> Box<dyn Player> {
+    fn to_boxed(self) -> Box<Player> {
         Box::new(self)
     }
 }

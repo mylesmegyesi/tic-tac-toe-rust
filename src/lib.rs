@@ -36,12 +36,32 @@ mod tests {
     use std::rc::Rc;
 
     #[test]
-    fn plays_a_full_game_to_a_tie() {
-        let player_one = Rc::new(MockPlayer::new("X", vec![0, 8, 1, 3, 6]));
-        let player_two = Rc::new(MockPlayer::new("O", vec![4, 7, 2, 5]));
+    fn plays_a_full_game_to_a_draw() {
+        let player_one = Rc::new(MockPlayer::new("X", vec![0, 8, 1, 6, 5]));
+        let player_two = Rc::new(MockPlayer::new("O", vec![4, 7, 2, 3]));
 
-        let result = play_game(player_one, player_two);
+        let result = play_game(player_one.clone(), player_two.clone());
 
         assert_eq!(result, GameState::Draw);
+    }
+
+    #[test]
+    fn plays_a_full_game_to_a_player_one_win() {
+        let player_one = Rc::new(MockPlayer::new("X", vec![0, 1, 2]));
+        let player_two = Rc::new(MockPlayer::new("O", vec![3, 4]));
+
+        let result = play_game(player_one.clone(), player_two.clone());
+
+        assert_eq!(result, GameState::Win(player_one.clone()));
+    }
+
+    #[test]
+    fn plays_a_full_game_to_a_player_two_win() {
+        let player_one = Rc::new(MockPlayer::new("X", vec![3, 4, 8]));
+        let player_two = Rc::new(MockPlayer::new("O", vec![0, 1, 2]));
+
+        let result = play_game(player_one.clone(), player_two.clone());
+
+        assert_eq!(result, GameState::Win(player_two.clone()));
     }
 }

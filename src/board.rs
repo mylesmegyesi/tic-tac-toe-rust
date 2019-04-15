@@ -9,7 +9,7 @@ pub struct Board {
 #[derive(Clone)]
 pub struct Cell {
     reference: CellReference,
-    occupant: Option<Rc<dyn Player>>,
+    occupant: Option<Rc<Player>>,
 }
 
 impl Cell {
@@ -22,7 +22,7 @@ impl Cell {
         &self.reference
     }
 
-    pub fn get_occupant(&self) -> Option<Rc<dyn Player>> {
+    pub fn get_occupant(&self) -> Option<Rc<Player>> {
         self.occupant.clone()
     }
 }
@@ -30,7 +30,7 @@ impl Cell {
 #[derive(Clone, Debug, PartialEq)]
 pub struct CellReference(usize);
 
-impl<'board, 'players> Board {
+impl Board {
     pub fn empty_board() -> Board {
         let mut cells: Vec<Cell> = Vec::with_capacity(9);
         for i in 0..9 {
@@ -42,18 +42,18 @@ impl<'board, 'players> Board {
         Board { cells, size: 3 }
     }
 
-    pub fn empty_cells(&'board self) -> Vec<&'board CellReference> {
+    pub fn empty_cells(&self) -> Vec<&CellReference> {
         self.cells.iter()
             .filter(|c| c.occupant.is_none())
             .map(|c| &c.reference)
             .collect()
     }
 
-    pub fn cells(&'board self) -> impl Iterator<Item=&'board Cell> {
+    pub fn cells(&self) -> impl Iterator<Item=&Cell> {
         self.cells.iter()
     }
 
-    pub fn segments(&'board self) -> Vec<Vec<&'board Cell>> {
+    pub fn segments(&self) -> Vec<Vec<&Cell>> {
         let mut segments = Vec::with_capacity(self.size * 2 + 2);
         let mut first_diagonal = Vec::with_capacity(self.size);
         let mut second_diagonal = Vec::with_capacity(self.size);
