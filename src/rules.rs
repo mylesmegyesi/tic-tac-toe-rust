@@ -1,15 +1,16 @@
+use std::rc::Rc;
 use crate::board::{Board, Cell};
 use crate::player::Player;
 
 #[derive(Debug)]
 #[derive(PartialEq)]
-pub enum GameState<'b> {
+pub enum GameState {
     Pending,
     Draw,
-    Win(&'b Box<dyn Player>),
+    Win(Rc<dyn Player>),
 }
 
-pub fn analyze_game_state<'board, 'players>(board: &'board Board<'players>) -> GameState<'players> {
+pub fn analyze_game_state(board: &Board) -> GameState {
     for segment in board.segments() {
         match get_segment_winner(&segment) {
             Some(winner) => return GameState::Win(winner),
@@ -24,7 +25,7 @@ pub fn analyze_game_state<'board, 'players>(board: &'board Board<'players>) -> G
     GameState::Pending
 }
 
-fn get_segment_winner<'board, 'players>(segment: &'board Vec<&'board Cell<'players>>) -> Option<&'players Box<dyn Player>> {
+fn get_segment_winner(segment: &Vec<&Cell>) -> Option<Rc<dyn Player>> {
     segment.first().and_then(|cell| {
         cell.get_occupant().and_then(|first_cell_occupant| {
             let all_in_segment_match = segment[1..].iter().all(|c| {
@@ -55,9 +56,9 @@ mod tests {
 
     #[test]
     fn detects_player_one_win_in_first_row() {
-        let player_one = MockPlayer::boxed("X");
-        let player_two = MockPlayer::boxed("O");
-        let board = Board::with_board(&player_one, &player_two, "\
+        let player_one = MockPlayer::with_marker("X");
+        let player_two = MockPlayer::with_marker("O");
+        let board = Board::with_board(player_one.clone(), player_two.clone(), "\
             X X X \
             O O - \
             - - - \
@@ -65,14 +66,14 @@ mod tests {
 
         let result = analyze_game_state(&board);
 
-        assert_eq!(result, GameState::Win(&player_one));
+        assert_eq!(result, GameState::Win(player_one));
     }
 
     #[test]
     fn detects_player_one_win_in_second_row() {
-        let player_one = MockPlayer::boxed("X");
-        let player_two = MockPlayer::boxed("O");
-        let board = Board::with_board(&player_one, &player_two, "\
+        let player_one = MockPlayer::with_marker("X");
+        let player_two = MockPlayer::with_marker("O");
+        let board = Board::with_board(player_one.clone(), player_two.clone(), "\
             O O - \
             X X X \
             - - - \
@@ -80,14 +81,14 @@ mod tests {
 
         let result = analyze_game_state(&board);
 
-        assert_eq!(result, GameState::Win(&player_one));
+        assert_eq!(result, GameState::Win(player_one));
     }
 
     #[test]
     fn detects_player_one_win_in_third_row() {
-        let player_one = MockPlayer::boxed("X");
-        let player_two = MockPlayer::boxed("O");
-        let board = Board::with_board(&player_one, &player_two, "\
+        let player_one = MockPlayer::with_marker("X");
+        let player_two = MockPlayer::with_marker("O");
+        let board = Board::with_board(player_one.clone(), player_two.clone(), "\
             O O - \
             - - - \
             X X X \
@@ -95,14 +96,14 @@ mod tests {
 
         let result = analyze_game_state(&board);
 
-        assert_eq!(result, GameState::Win(&player_one));
+        assert_eq!(result, GameState::Win(player_one));
     }
 
     #[test]
     fn detects_player_two_win_in_first_row() {
-        let player_one = MockPlayer::boxed("X");
-        let player_two = MockPlayer::boxed("O");
-        let board = Board::with_board(&player_one, &player_two, "\
+        let player_one = MockPlayer::with_marker("X");
+        let player_two = MockPlayer::with_marker("O");
+        let board = Board::with_board(player_one.clone(), player_two.clone(), "\
             O O O \
             - - - \
             - - - \
@@ -110,14 +111,14 @@ mod tests {
 
         let result = analyze_game_state(&board);
 
-        assert_eq!(result, GameState::Win(&player_two));
+        assert_eq!(result, GameState::Win(player_two));
     }
 
     #[test]
     fn detects_player_two_win_in_second_row() {
-        let player_one = MockPlayer::boxed("X");
-        let player_two = MockPlayer::boxed("O");
-        let board = Board::with_board(&player_one, &player_two, "\
+        let player_one = MockPlayer::with_marker("X");
+        let player_two = MockPlayer::with_marker("O");
+        let board = Board::with_board(player_one.clone(), player_two.clone(), "\
             X X - \
             O O O \
             - - - \
@@ -125,14 +126,14 @@ mod tests {
 
         let result = analyze_game_state(&board);
 
-        assert_eq!(result, GameState::Win(&player_two));
+        assert_eq!(result, GameState::Win(player_two));
     }
 
     #[test]
     fn detects_player_two_win_in_third_row() {
-        let player_one = MockPlayer::boxed("X");
-        let player_two = MockPlayer::boxed("O");
-        let board = Board::with_board(&player_one, &player_two, "\
+        let player_one = MockPlayer::with_marker("X");
+        let player_two = MockPlayer::with_marker("O");
+        let board = Board::with_board(player_one.clone(), player_two.clone(), "\
             - - - \
             X X - \
             O O O \
@@ -140,14 +141,14 @@ mod tests {
 
         let result = analyze_game_state(&board);
 
-        assert_eq!(result, GameState::Win(&player_two));
+        assert_eq!(result, GameState::Win(player_two));
     }
 
     #[test]
     fn detects_player_one_win_in_first_column() {
-        let player_one = MockPlayer::boxed("X");
-        let player_two = MockPlayer::boxed("O");
-        let board = Board::with_board(&player_one, &player_two, "\
+        let player_one = MockPlayer::with_marker("X");
+        let player_two = MockPlayer::with_marker("O");
+        let board = Board::with_board(player_one.clone(), player_two.clone(), "\
             X O - \
             X O - \
             X - - \
@@ -155,14 +156,14 @@ mod tests {
 
         let result = analyze_game_state(&board);
 
-        assert_eq!(result, GameState::Win(&player_one));
+        assert_eq!(result, GameState::Win(player_one));
     }
 
     #[test]
     fn detects_player_one_win_in_second_column() {
-        let player_one = MockPlayer::boxed("X");
-        let player_two = MockPlayer::boxed("O");
-        let board = Board::with_board(&player_one, &player_two, "\
+        let player_one = MockPlayer::with_marker("X");
+        let player_two = MockPlayer::with_marker("O");
+        let board = Board::with_board(player_one.clone(), player_two.clone(), "\
             O X - \
             O X - \
             - X - \
@@ -170,14 +171,14 @@ mod tests {
 
         let result = analyze_game_state(&board);
 
-        assert_eq!(result, GameState::Win(&player_one));
+        assert_eq!(result, GameState::Win(player_one));
     }
 
     #[test]
     fn detects_player_one_win_in_third_column() {
-        let player_one = MockPlayer::boxed("X");
-        let player_two = MockPlayer::boxed("O");
-        let board = Board::with_board(&player_one, &player_two, "\
+        let player_one = MockPlayer::with_marker("X");
+        let player_two = MockPlayer::with_marker("O");
+        let board = Board::with_board(player_one.clone(), player_two.clone(), "\
             O - X \
             O - X \
             - - X \
@@ -185,14 +186,14 @@ mod tests {
 
         let result = analyze_game_state(&board);
 
-        assert_eq!(result, GameState::Win(&player_one));
+        assert_eq!(result, GameState::Win(player_one));
     }
 
     #[test]
     fn detects_player_two_win_in_first_column() {
-        let player_one = MockPlayer::boxed("X");
-        let player_two = MockPlayer::boxed("O");
-        let board = Board::with_board(&player_one, &player_two, "\
+        let player_one = MockPlayer::with_marker("X");
+        let player_two = MockPlayer::with_marker("O");
+        let board = Board::with_board(player_one.clone(), player_two.clone(), "\
             O X - \
             O X - \
             O - - \
@@ -200,14 +201,14 @@ mod tests {
 
         let result = analyze_game_state(&board);
 
-        assert_eq!(result, GameState::Win(&player_two));
+        assert_eq!(result, GameState::Win(player_two));
     }
 
     #[test]
     fn detects_player_two_win_in_second_column() {
-        let player_one = MockPlayer::boxed("X");
-        let player_two = MockPlayer::boxed("O");
-        let board = Board::with_board(&player_one, &player_two, "\
+        let player_one = MockPlayer::with_marker("X");
+        let player_two = MockPlayer::with_marker("O");
+        let board = Board::with_board(player_one.clone(), player_two.clone(), "\
             X O - \
             X O - \
             - O - \
@@ -215,14 +216,14 @@ mod tests {
 
         let result = analyze_game_state(&board);
 
-        assert_eq!(result, GameState::Win(&player_two));
+        assert_eq!(result, GameState::Win(player_two));
     }
 
     #[test]
     fn detects_player_two_win_in_third_column() {
-        let player_one = MockPlayer::boxed("X");
-        let player_two = MockPlayer::boxed("O");
-        let board = Board::with_board(&player_one, &player_two, "\
+        let player_one = MockPlayer::with_marker("X");
+        let player_two = MockPlayer::with_marker("O");
+        let board = Board::with_board(player_one.clone(), player_two.clone(), "\
             - X O \
             - X O \
             - - O \
@@ -230,14 +231,14 @@ mod tests {
 
         let result = analyze_game_state(&board);
 
-        assert_eq!(result, GameState::Win(&player_two));
+        assert_eq!(result, GameState::Win(player_two));
     }
 
     #[test]
     fn detects_player_one_win_in_first_diagonal() {
-        let player_one = MockPlayer::boxed("X");
-        let player_two = MockPlayer::boxed("O");
-        let board = Board::with_board(&player_one, &player_two, "\
+        let player_one = MockPlayer::with_marker("X");
+        let player_two = MockPlayer::with_marker("O");
+        let board = Board::with_board(player_one.clone(), player_two.clone(), "\
             X - - \
             O X O \
             - - X \
@@ -245,14 +246,14 @@ mod tests {
 
         let result = analyze_game_state(&board);
 
-        assert_eq!(result, GameState::Win(&player_one));
+        assert_eq!(result, GameState::Win(player_one));
     }
 
     #[test]
     fn detects_player_one_win_in_second_diagonal() {
-        let player_one = MockPlayer::boxed("X");
-        let player_two = MockPlayer::boxed("O");
-        let board = Board::with_board(&player_one, &player_two, "\
+        let player_one = MockPlayer::with_marker("X");
+        let player_two = MockPlayer::with_marker("O");
+        let board = Board::with_board(player_one.clone(), player_two.clone(), "\
             - - X \
             O X O \
             X - - \
@@ -260,14 +261,14 @@ mod tests {
 
         let result = analyze_game_state(&board);
 
-        assert_eq!(result, GameState::Win(&player_one));
+        assert_eq!(result, GameState::Win(player_one));
     }
 
     #[test]
     fn detects_player_two_win_in_first_diagonal() {
-        let player_one = MockPlayer::boxed("X");
-        let player_two = MockPlayer::boxed("O");
-        let board = Board::with_board(&player_one, &player_two, "\
+        let player_one = MockPlayer::with_marker("X");
+        let player_two = MockPlayer::with_marker("O");
+        let board = Board::with_board(player_one.clone(), player_two.clone(), "\
             O - - \
             X O X \
             - - O \
@@ -275,14 +276,14 @@ mod tests {
 
         let result = analyze_game_state(&board);
 
-        assert_eq!(result, GameState::Win(&player_two));
+        assert_eq!(result, GameState::Win(player_two));
     }
 
     #[test]
     fn detects_player_two_win_in_second_diagonal() {
-        let player_one = MockPlayer::boxed("X");
-        let player_two = MockPlayer::boxed("O");
-        let board = Board::with_board(&player_one, &player_two, "\
+        let player_one = MockPlayer::with_marker("X");
+        let player_two = MockPlayer::with_marker("O");
+        let board = Board::with_board(player_one.clone(), player_two.clone(), "\
             - - O \
             X O X \
             O - - \
@@ -290,14 +291,14 @@ mod tests {
 
         let result = analyze_game_state(&board);
 
-        assert_eq!(result, GameState::Win(&player_two));
+        assert_eq!(result, GameState::Win(player_two));
     }
 
     #[test]
     fn detects_draw() {
-        let player_one = MockPlayer::boxed("X");
-        let player_two = MockPlayer::boxed("O");
-        let board = Board::with_board(&player_one, &player_two, "\
+        let player_one = MockPlayer::with_marker("X");
+        let player_two = MockPlayer::with_marker("O");
+        let board = Board::with_board(player_one.clone(), player_two.clone(), "\
             X X O \
             O O X \
             X O X \
@@ -310,9 +311,9 @@ mod tests {
 
     #[test]
     fn detects_pending_when_not_full() {
-        let player_one = MockPlayer::boxed("X");
-        let player_two = MockPlayer::boxed("O");
-        let board = Board::with_board(&player_one, &player_two, "\
+        let player_one = MockPlayer::with_marker("X");
+        let player_two = MockPlayer::with_marker("O");
+        let board = Board::with_board(player_one.clone(), player_two.clone(), "\
             X X O \
             O O - \
             X O X \
